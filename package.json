@@ -1,0 +1,16 @@
+{
+  "name": "sign-language-communication-board",
+  "version": "1.0.0",
+  "description": "手语沟通板 - 常用词独立分类版",
+  "main": "index.js",
+  "scripts": {
+    "start": "serve -s .",
+    "dev": "serve -s ."
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "keywords": ["sign-language", "communication", "deaf"],
+  "author": "",
+  "license": "MIT"
+}

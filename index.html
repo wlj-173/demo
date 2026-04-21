@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>手语沟通板 · 常用词独立分类版</title>
+    <style>
+        /* ========== 样式（完全保留原有样式，未做任何改动） ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #f0f5fb;
+            padding: 16px;
+            min-height: 100vh;
+        }
+        .mode-switch {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .mode-btn {
+            flex: 1;
+            background: white;
+            border: 5px solid #b3c6d4;
+            border-radius: 60px;
+            padding: 22px 8px;
+            font-size: 2.4rem;
+            font-weight: 800;
+            text-align: center;
+            color: #003057;
+            box-shadow: 0 8px 0 #8fa5b5;
+            cursor: pointer;
+            transition: 0.1s;
+            touch-action: manipulation;
+        }
+        .mode-btn.active {
+            background: #2a7f9c;
+            border-color: #0d4b63;
+            color: white;
+            box-shadow: 0 8px 0 #0d3f52;
+            transform: translateY(2px);
+        }
+        .mode-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #8fa5b5;
+        }
+        .search-area {
+            background: white;
+            border-radius: 60px;
+            padding: 8px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 3px solid #b3c9db;
+        }
+        .search-icon {
+            font-size: 2.4rem;
+        }
+        .search-input {
+            flex: 1;
+            border: none;
+            font-size: 1.8rem;
+            padding: 14px 0;
+            outline: none;
+            background: transparent;
+        }
+        .clear-search {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #888;
+            padding: 8px;
+        }
+        .suggestions {
+            background: white;
+            border-radius: 40px;
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: -12px;
+            margin-bottom: 16px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            border: 1px solid #cbdae7;
+        }
+        .suggestion-item {
+            padding: 14px 24px;
+            font-size: 1.8rem;
+            border-bottom: 1px solid #e0ecf5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .suggestion-item:active {
+            background: #d9ecff;
+        }
+        .suggestion-item .sug-media {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            font-size: 2.4rem;
+            text-align: center;
+        }
+        .suggestion-item .sug-word {
+            font-weight: 600;
+            color: #003057;
+        }
+        .suggestion-item .sug-category {
+            margin-left: auto;
+            font-size: 1.4rem;
+            color: #2c7da0;
+        }
+        .display-area {
+            background: white;
+            border-radius: 48px;
+            padding: 28px 20px;
+            margin-bottom: 20px;
+            border: 5px solid #9fbcd0;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        #deafDisplay {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #003153;
+            text-align: center;
+            word-break: break-word;
+        }
+        #normalDisplay {
+            font-size: 3rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        .normal-sign {
+            font-size: 2.4rem;
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .normal-sign img {
+            max-width: 48px;
+            max-height: 48px;
+            width: auto;
+            height: auto;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .action-btn {
+            background: #ffb74d;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 30px;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #3e2723;
+            box-shadow: 0 5px 0 #e67e22;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #e8f0f7;
+            border-radius: 60px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+        }
+        .quick-link {
+            background: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 24px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #003057;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-link:active {
+            transform: scale(0.96);
+        }
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .cat-btn {
+            flex: 1 0 calc(25% - 12px);
+            background: white;
+            border: 4px solid #b3c9db;
+            border-radius: 50px;
+            padding: 14px 4px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #003057;
+            text-align: center;
+            box-shadow: 0 5px 0 #8fa5b5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .cat-btn .cat-icon {
+            font-size: 2.2rem;
+        }
+        .cat-btn.active {
+            background: #2a7f9c;
+            border-color: #0d4b63;
+            color: white;
+            box-shadow: 0 5px 0 #0d3f52;
+        }
+        .cat-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #8fa5b5;
+        }
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+        .hand-card {
+            flex: 1 0 calc(33.33% - 14px);
+            background: white;
+            border-radius: 40px;
+            padding: 22px 6px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 4px solid #cbdae7;
+            box-shadow: 0 8px 0 #9bb0c0;
+            cursor: pointer;
+            transition: 0.05s;
+        }
+        .hand-card:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #9bb0c0;
+            background: #e3f0fa;
+        }
+        .hand-card .card-media {
+            max-width: 100px;
+            max-height: 100px;
+            width: auto;
+            height: auto;
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        .hand-card .word {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #002b44;
+            text-align: center;
+        }
+        @keyframes highlightFlash {
+            0% { background-color: #ffecb3; border-color: #ffa000; transform: scale(1); }
+            50% { background-color: #ffe082; border-color: #ff8f00; transform: scale(1.02); }
+            100% { background-color: white; border-color: #cbdae7; transform: scale(1); }
+        }
+        .highlight-card {
+            animation: highlightFlash 0.6s ease-in-out 2;
+        }
+        @media (max-width: 480px) {
+            .mode-btn { font-size: 2rem; padding: 16px 4px; }
+            .cat-btn { flex: 1 0 calc(33.33% - 12px); font-size: 1.6rem; }
+            .hand-card { flex: 1 0 calc(50% - 14px); }
+            .search-input { font-size: 1.6rem; }
+            .hand-card .card-media { max-width: 70px; max-height: 70px; font-size: 3rem; }
+            .quick-link { font-size: 1.6rem; padding: 6px 16px; }
+        }
+        .info-text {
+            font-size: 1.6rem;
+            color: #2c5a73;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="mode-switch">
+        <div class="mode-btn" id="modeDeaf">🧏 聋哑人入口</div>
+        <div class="mode-btn" id="modeNormal">🗣️ 普通人入口</div>
+    </div>
+
+    <div class="search-area">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="搜索手语词... 例如: 高兴, 谢谢">
+        <button class="clear-search" id="clearSearchBtn">✖</button>
+    </div>
+    <div id="suggestionsBox" class="suggestions hidden"></div>
+
+    <div class="quick-links" id="quickLinks">
+        <button class="quick-link" data-word="你好">👋 你好</button>
+        <button class="quick-link" data-word="谢谢">🙏 谢谢</button>
+        <button class="quick-link" data-word="对不起">😔 对不起</button>
+        <button class="quick-link" data-word="帮助">🆘 帮助</button>
+        <button class="quick-link" data-word="吃饭">🍚 吃饭</button>
+        <button class="quick-link" data-word="喝水">💧 喝水</button>
+    </div>
+
+    <div class="display-area">
+        <div id="deafDisplay" class="hidden">👆 点击手语图片</div>
+        <div id="normalDisplay" class="hidden"></div>
+    </div>
+
+    <div class="action-bar">
+        <button class="action-btn" id="clearBtn">🗑️ 清空句子</button>
+        <button class="action-btn" id="clearMemoryBtn">🗑️ 清空记忆</button>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs"></div>
+    <div id="cardContainer" class="card-grid"></div>
+    <div class="info-text" id="modeHint">请先选择上方入口</div>
+
+    <script>
+        (function() {
+            // ========== 关键修改：自动适配图片路径（APK 或普通浏览器） ==========
+            function getImageBasePath() {
+                // 检测是否在 Android WebView 中（file:// 协议且 userAgent 包含 android/wv）
+                const isAndroidWebView = () => {
+                    const ua = navigator.userAgent.toLowerCase();
+                    return (ua.includes('wv') || ua.includes('android')) && window.location.protocol === 'file:';
+                };
+                if (isAndroidWebView()) {
+                    return 'file:///android_asset/images/';
+                } else {
+                    return 'images/';
+                }
+            }
+            const IMAGE_BASE = getImageBasePath();
+
+            // ---------- 1. 定义特殊词语集合（使用图片）----------
+            const specialWords = new Set([
+                "你","我","他","我们","大家","自己","男","女","遵守","营养","善良","飞跃","好转","潇洒","传染","良心","规则","受不了",
+                "今天","昨天","明天","前天","后天","大后天","大前天","视频","手语","证明","世界","翻译","谢谢","不是","是","算了","没有","不行","有","用","属于",
+                "敬礼","称赞","劳驾","再见","等候","对不起","抱歉","原谅","麻烦","辣","咸","苦","甜","酸","涩","偶像","胡说八道吧","感恩","不听话","顽固",
+                "强迫","假冒","夸张","笨","滚","酷","活泼","猪","呆","每","帅","饱经沧桑","一般","命运","故事","信任","历史","没事","运气","大方","期待",
+                "聪明","爽快","完了","馋","草率","隐瞒","不知道","荒唐","报仇","乏力","自立更生","消遣","抵赖","错误","包括","认真","嘲弄","威严","倔强",
+                "拖拉","处罚","鲜艳","勾结","国家","清醒","玩","谁","梦想","会","但是","颤抖","尽力","人","禁止","每周","时代","一刹那","断绝"
+            ]);
+
+            // ---------- 2. 词汇库（完整保留，与您原代码完全一致）----------
+            const originalCategories = [
+                { name: "人称代词", words: [{ chinese: "我", emoji: "👤" },{ chinese: "你", emoji: "👉" },{ chinese: "他", emoji: "👨" },{ chinese: "她", emoji: "👩" },{ chinese: "它", emoji: "🐾" },{ chinese: "我们", emoji: "👥" },{ chinese: "你们", emoji: "👥👉" },{ chinese: "他们", emoji: "👥👨" }] },
+                { name: "动词", words: [{ chinese: "吃", emoji: "🍽️" },{ chinese: "喝", emoji: "🥤" },{ chinese: "走", emoji: "🚶" },{ chinese: "看", emoji: "👀" },{ chinese: "听", emoji: "👂" },{ chinese: "说", emoji: "🗣️" },{ chinese: "问", emoji: "❓" },{ chinese: "答", emoji: "💬" },{ chinese: "买", emoji: "🛒" },{ chinese: "卖", emoji: "💰" },{ chinese: "去", emoji: "➡️" },{ chinese: "来", emoji: "⬅️" },{ chinese: "坐", emoji: "🪑" },{ chinese: "站", emoji: "🧍" },{ chinese: "跑", emoji: "🏃" },{ chinese: "跳", emoji: "🤸" },{ chinese: "拿", emoji: "✋" },{ chinese: "放", emoji: "📦" },{ chinese: "开", emoji: "🔛" },{ chinese: "关", emoji: "🔒" },{ chinese: "洗", emoji: "🧼" },{ chinese: "睡", emoji: "😴" }] },
+                { name: "食物", words: [{ chinese: "米饭", emoji: "🍚" },{ chinese: "面条", emoji: "🍜" },{ chinese: "面包", emoji: "🍞" },{ chinese: "牛奶", emoji: "🥛" },{ chinese: "水", emoji: "💧" },{ chinese: "苹果", emoji: "🍎" },{ chinese: "香蕉", emoji: "🍌" },{ chinese: "肉", emoji: "🥩" },{ chinese: "鱼", emoji: "🐟" },{ chinese: "鸡蛋", emoji: "🥚" },{ chinese: "菜", emoji: "🥬" },{ chinese: "汤", emoji: "🍲" },{ chinese: "咖啡", emoji: "☕" },{ chinese: "茶", emoji: "🍵" },{ chinese: "糖", emoji: "🍬" }] },
+                { name: "动物", words: [{ chinese: "猫", emoji: "🐱" },{ chinese: "狗", emoji: "🐶" },{ chinese: "鸟", emoji: "🐦" },{ chinese: "鱼", emoji: "🐟" },{ chinese: "牛", emoji: "🐮" },{ chinese: "羊", emoji: "🐑" },{ chinese: "马", emoji: "🐴" },{ chinese: "猪", emoji: "🐷" },{ chinese: "鸡", emoji: "🐔" },{ chinese: "鸭", emoji: "🦆" },{ chinese: "兔", emoji: "🐰" }] },
+                { name: "物品", words: [{ chinese: "衣服", emoji: "👕" },{ chinese: "鞋子", emoji: "👟" },{ chinese: "帽子", emoji: "🧢" },{ chinese: "手机", emoji: "📱" },{ chinese: "电脑", emoji: "💻" },{ chinese: "电视", emoji: "📺" },{ chinese: "桌子", emoji: "🪑" },{ chinese: "椅子", emoji: "🪑" },{ chinese: "床", emoji: "🛏️" },{ chinese: "门", emoji: "🚪" },{ chinese: "窗", emoji: "🪟" },{ chinese: "灯", emoji: "💡" },{ chinese: "书", emoji: "📚" },{ chinese: "笔", emoji: "✒️" }] },
+                { name: "场所", words: [{ chinese: "家", emoji: "🏠" },{ chinese: "学校", emoji: "🏫" },{ chinese: "医院", emoji: "🏥" },{ chinese: "商店", emoji: "🏪" },{ chinese: "超市", emoji: "🛒" },{ chinese: "公园", emoji: "🌳" },{ chinese: "餐厅", emoji: "🍽️" },{ chinese: "车站", emoji: "🚏" },{ chinese: "机场", emoji: "✈️" }] },
+                { name: "时间", words: [{ chinese: "今天", emoji: "📅" },{ chinese: "明天", emoji: "🌅" },{ chinese: "昨天", emoji: "🌙" },{ chinese: "早上", emoji: "🌞" },{ chinese: "中午", emoji: "☀️" },{ chinese: "晚上", emoji: "🌛" },{ chinese: "小时", emoji: "⏰" },{ chinese: "分钟", emoji: "⏱️" },{ chinese: "现在", emoji: "🕐" }] },
+                { name: "数字", words: [{ chinese: "0", emoji: "0️⃣" },{ chinese: "1", emoji: "1️⃣" },{ chinese: "2", emoji: "2️⃣" },{ chinese: "3", emoji: "3️⃣" },{ chinese: "4", emoji: "4️⃣" },{ chinese: "5", emoji: "5️⃣" },{ chinese: "6", emoji: "6️⃣" },{ chinese: "7", emoji: "7️⃣" },{ chinese: "8", emoji: "8️⃣" },{ chinese: "9", emoji: "9️⃣" },{ chinese: "10", emoji: "🔟" }] },
+                { name: "颜色", words: [{ chinese: "红", emoji: "🔴" },{ chinese: "黄", emoji: "🟡" },{ chinese: "蓝", emoji: "🔵" },{ chinese: "绿", emoji: "🟢" },{ chinese: "黑", emoji: "⚫" },{ chinese: "白", emoji: "⚪" },{ chinese: "紫", emoji: "🟣" },{ chinese: "橙", emoji: "🟠" },{ chinese: "粉", emoji: "🌸" }] },
+                { name: "情感", words: [{ chinese: "高兴", emoji: "😊" },{ chinese: "伤心", emoji: "😢" },{ chinese: "生气", emoji: "😠" },{ chinese: "害怕", emoji: "😨" },{ chinese: "惊讶", emoji: "😲" },{ chinese: "害羞", emoji: "😳" }] },
+                { name: "社交", words: [{ chinese: "你好", emoji: "👋" },{ chinese: "再见", emoji: "🙋" },{ chinese: "谢谢", emoji: "🙏" },{ chinese: "对不起", emoji: "😔" },{ chinese: "没关系", emoji: "👍" },{ chinese: "请", emoji: "🤲" },{ chinese: "帮助", emoji: "🆘" }] },
+                { name: "交通", words: [{ chinese: "车", emoji: "🚗" },{ chinese: "公交车", emoji: "🚌" },{ chinese: "地铁", emoji: "🚇" },{ chinese: "飞机", emoji: "✈️" },{ chinese: "火车", emoji: "🚆" },{ chinese: "自行车", emoji: "🚲" },{ chinese: "出租车", emoji: "🚕" },{ chinese: "红绿灯", emoji: "🚦" }] },
+                { name: "医疗", words: [{ chinese: "医生", emoji: "👨‍⚕️" },{ chinese: "护士", emoji: "👩‍⚕️" },{ chinese: "药", emoji: "💊" },{ chinese: "医院", emoji: "🏥" },{ chinese: "感冒", emoji: "🤧" },{ chinese: "发烧", emoji: "🌡️" },{ chinese: "头疼", emoji: "🤕" },{ chinese: "牙疼", emoji: "🦷" },{ chinese: "打针", emoji: "💉" }] },
+                { name: "家庭", words: [{ chinese: "爸爸", emoji: "👨" },{ chinese: "妈妈", emoji: "👩" },{ chinese: "哥哥", emoji: "👦" },{ chinese: "弟弟", emoji: "🧒" },{ chinese: "姐姐", emoji: "👧" },{ chinese: "妹妹", emoji: "🧒" },{ chinese: "爷爷", emoji: "👴" },{ chinese: "奶奶", emoji: "👵" },{ chinese: "孩子", emoji: "🧸" }] },
+                { name: "疑问", words: [{ chinese: "谁", emoji: "🫵" },{ chinese: "什么", emoji: "❓" },{ chinese: "哪里", emoji: "📍" },{ chinese: "为什么", emoji: "🤔" },{ chinese: "怎么", emoji: "❓" },{ chinese: "多少", emoji: "🔢" }] },
+                { name: "形容词", words: [{ chinese: "大", emoji: "🐘" },{ chinese: "小", emoji: "🐭" },{ chinese: "多", emoji: "📈" },{ chinese: "少", emoji: "📉" },{ chinese: "好", emoji: "👍" },{ chinese: "坏", emoji: "👎" },{ chinese: "快", emoji: "⚡" },{ chinese: "慢", emoji: "🐢" },{ chinese: "热", emoji: "🔥" },{ chinese: "冷", emoji: "❄️" }] },
+                { name: "职业", words: [{ chinese: "老师", emoji: "👩‍🏫" },{ chinese: "学生", emoji: "🧑‍🎓" },{ chinese: "警察", emoji: "👮" },{ chinese: "工人", emoji: "👷" },{ chinese: "农民", emoji: "👨‍🌾" }] },
+                { name: "自然", words: [{ chinese: "太阳", emoji: "☀️" },{ chinese: "月亮", emoji: "🌙" },{ chinese: "星星", emoji: "⭐" },{ chinese: "风", emoji: "🌬️" },{ chinese: "雨", emoji: "☔" },{ chinese: "云", emoji: "☁️" },{ chinese: "山", emoji: "⛰️" },{ chinese: "水", emoji: "💧" },{ chinese: "火", emoji: "🔥" }] }
+            ];
+            const newCategories = [
+                { name: "代词", words: ["你","我","他","我们","大家","自己"] },
+                { name: "动词", words: ["颤抖","尽力","禁止","断绝","玩","旅游","会","拖拉","勾结","抵赖","嘲弄","草率","隐瞒","不知道","荒唐","报仇","乏力","期待","爽快","完了","馋","滚","强迫","假冒","夸张","谢谢","敬礼","称赞","劳驾","再见","等候","对不起","抱歉","原谅","麻烦","用","属于","证明","翻译","遵循","飞跃","好转","自力更生","包括","信任","感恩","不听话","顽固"] },
+                { name: "形容词", words: ["清醒","威严","倔强","鲜艳","认真","大方","聪明","饱经沧桑","笨","酷","活泼","呆","美","帅","胡说八道","感恩","不听话","顽固","辣","咸","苦","甜","酸","涩","潇洒","善良","荒唐","乏力","爽快","馋"] },
+                { name: "名词", words: ["人","时代","一刹那","国家","命运","故事","历史","运气","偶像","视频","手语","世界","营养","生活","恋爱","对象","结婚","离婚","错误","威严","倔强","猪","偶像","世界","翻译"] },
+                { name: "时间词", words: ["每周","今天","昨天","明天","前天","后天","大后天","大前天"] },
+                { name: "连词/副词", words: ["但是","没有","不是","是","算了","不行","有","没事"] },
+                { name: "否定/判断", words: ["没有","不是","是","算了","不行","有"] },
+                { name: "数词", words: ["一","二","三","四","五","六","七","八","九","十","十一","十二","二十","三十","百","千","万","零"] }
+            ];
+            // 合并
+            let existingWordsSet = new Set();
+            for (let cat of originalCategories) for (let w of cat.words) existingWordsSet.add(w.chinese);
+            let mergedCategories = JSON.parse(JSON.stringify(originalCategories));
+            function findCategoryIndex(name) { return mergedCategories.findIndex(cat => cat.name === name); }
+            for (let newCat of newCategories) {
+                let idx = findCategoryIndex(newCat.name);
+                if (idx !== -1) {
+                    let newWordsList = newCat.words;
+                    mergedCategories[idx].words = mergedCategories[idx].words.filter(w => !newWordsList.includes(w.chinese));
+                    for (let word of newWordsList) mergedCategories[idx].words.push({ chinese: word, emoji: "🖼️" });
+                } else {
+                    let newCatObj = { name: newCat.name, words: [] };
+                    for (let word of newCat.words) newCatObj.words.push({ chinese: word, emoji: "🖼️" });
+                    mergedCategories.push(newCatObj);
+                }
+            }
+            let numberCatIdx = findCategoryIndex("数字");
+            if (numberCatIdx !== -1) {
+                let newNumbers = newCategories.find(c => c.name === "数词")?.words || [];
+                mergedCategories[numberCatIdx].words = mergedCategories[numberCatIdx].words.filter(w => !newNumbers.includes(w.chinese));
+                for (let num of newNumbers) mergedCategories[numberCatIdx].words.push({ chinese: num, emoji: "🖼️" });
+                let extraNumIdx = findCategoryIndex("数词");
+                if (extraNumIdx !== -1) mergedCategories.splice(extraNumIdx, 1);
+            } else {
+                let newNumbers = newCategories.find(c => c.name === "数词")?.words || [];
+                let numObj = { name: "数字", words: [] };
+                for (let num of newNumbers) numObj.words.push({ chinese: num, emoji: "🖼️" });
+                mergedCategories.push(numObj);
+            }
+            const categories = mergedCategories;
+
+            // 构建所有词汇的索引
+            let allWords = [];
+            categories.forEach((cat, catIdx) => {
+                cat.words.forEach((word, wordIdx) => {
+                    allWords.push({ chinese: word.chinese, categoryName: cat.name, categoryIndex: catIdx, wordIndex: wordIdx });
+                });
+            });
+
+            // ---------- 辅助函数：获取词语的展示内容（图片或emoji）----------
+            function getMediaHtml(word, className = "card-media") {
+                if (specialWords.has(word)) {
+                    const url = IMAGE_BASE + encodeURIComponent(word) + '.jpg';
+                    return `<img src="${url}" alt="${word}" class="${className}" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23eef2f5\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-size=\\'14\\' text-anchor=\\'middle\\' fill=\\'%23999\\'%3E${word}%3C/text%3E%3C/svg%3E';">`;
+                } else {
+                    let emoji = "🤟";
+                    for (let cat of categories) {
+                        let found = cat.words.find(w => w.chinese === word);
+                        if (found && found.emoji && found.emoji !== "🖼️") {
+                            emoji = found.emoji;
+                            break;
+                        }
+                    }
+                    return `<span class="${className}" style="font-size:4rem;">${emoji}</span>`;
+                }
+            }
+
+            function getSmallMediaHtml(word) {
+                if (specialWords.has(word)) {
+                    const url = IMAGE_BASE + encodeURIComponent(word) + '.jpg';
+                    return `<img src="${url}" alt="${word}" style="max-width:40px; max-height:40px; width:auto; height:auto;" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 40 40\\'%3E%3Crect width=\\'40\\' height=\\'40\\' fill=\\'%23eef2f5\\'/%3E%3Ctext x=\\'20\\' y=\\'22\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%23999\\'%3E${word}%3C/text%3E%3C/svg%3E';">`;
+                } else {
+                    let emoji = "🤟";
+                    for (let cat of categories) {
+                        let found = cat.words.find(w => w.chinese === word);
+                        if (found && found.emoji && found.emoji !== "🖼️") {
+                            emoji = found.emoji;
+                            break;
+                        }
+                    }
+                    return `<span style="font-size:2rem;">${emoji}</span>`;
+                }
+            }
+
+            // ---------- 持久化存储 ----------
+            const STORAGE_KEY = 'deaf_word_usage';
+            let wordUsage = new Map();
+            function loadUsageFromStorage() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) try { const obj = JSON.parse(stored); for (let [w, d] of Object.entries(obj)) wordUsage.set(w, { count: d.count }); } catch(e) {}
+            }
+            function saveUsageToStorage() {
+                let obj = {};
+                for (let [w, d] of wordUsage.entries()) obj[w] = { count: d.count };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+            }
+            function addWordUsage(word) {
+                if (currentMode !== 'deaf') return;
+                if (wordUsage.has(word)) wordUsage.get(word).count += 1;
+                else wordUsage.set(word, { count: 1 });
+                saveUsageToStorage();
+                if (currentCatIndex === categories.length) {
+                    renderCards();
+                }
+            }
+            function clearMemory() {
+                wordUsage.clear();
+                saveUsageToStorage();
+                if (currentCatIndex === categories.length) renderCards();
+            }
+
+            // ---------- 状态 ----------
+            let currentMode = 'deaf';
+            let currentCatIndex = 0;
+            let deafSentence = [];
+            let normalSentence = [];
+
+            // DOM 元素
+            const modeDeafBtn = document.getElementById('modeDeaf');
+            const modeNormalBtn = document.getElementById('modeNormal');
+            const deafDisplay = document.getElementById('deafDisplay');
+            const normalDisplay = document.getElementById('normalDisplay');
+            const modeHint = document.getElementById('modeHint');
+            const categoryTabs = document.getElementById('categoryTabs');
+            const cardContainer = document.getElementById('cardContainer');
+            const clearBtn = document.getElementById('clearBtn');
+            const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+            const searchInput = document.getElementById('searchInput');
+            const suggestionsBox = document.getElementById('suggestionsBox');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            const quickLinks = document.querySelectorAll('.quick-link');
+
+            function updateDisplay() {
+                if (currentMode === 'deaf') {
+                    deafDisplay.classList.remove('hidden');
+                    normalDisplay.classList.add('hidden');
+                    deafDisplay.innerText = deafSentence.length ? deafSentence.join('') : '👆 点击手语图片';
+                } else if (currentMode === 'normal') {
+                    deafDisplay.classList.add('hidden');
+                    normalDisplay.classList.remove('hidden');
+                    if (normalSentence.length === 0) {
+                        normalDisplay.innerHTML = '👆 点击词语';
+                    } else {
+                        normalDisplay.innerHTML = normalSentence.map(word => {
+                            return `<span class="normal-sign">${getSmallMediaHtml(word)} ${word}</span>`;
+                        }).join('');
+                    }
+                }
+            }
+
+            function clearSentence() {
+                if (currentMode === 'deaf') deafSentence = [];
+                else if (currentMode === 'normal') normalSentence = [];
+                updateDisplay();
+            }
+
+            function renderCategoryTabs() {
+                let html = '';
+                categories.forEach((cat, index) => {
+                    let icon = "📁";
+                    if (cat.name === "人称代词") icon = "👥";
+                    else if (cat.name === "动词") icon = "✋";
+                    else if (cat.name === "形容词") icon = "📏";
+                    else if (cat.name === "名词") icon = "📦";
+                    else if (cat.name === "时间") icon = "⏰";
+                    else if (cat.name === "数字") icon = "🔢";
+                    else if (cat.name === "颜色") icon = "🎨";
+                    else if (cat.name === "情感") icon = "😊";
+                    else if (cat.name === "社交") icon = "🤝";
+                    else if (cat.name === "交通") icon = "🚗";
+                    else if (cat.name === "医疗") icon = "💊";
+                    else if (cat.name === "家庭") icon = "👪";
+                    else if (cat.name === "疑问") icon = "❓";
+                    else if (cat.name === "职业") icon = "👩‍💼";
+                    else if (cat.name === "自然") icon = "🌳";
+                    else if (cat.name === "代词") icon = "👥";
+                    else if (cat.name === "时间词") icon = "⏰";
+                    else if (cat.name === "连词/副词") icon = "🔗";
+                    else if (cat.name === "否定/判断") icon = "❌";
+                    html += `<div class="cat-btn ${index === currentCatIndex ? 'active' : ''}" data-cat-index="${index}">
+                                <span class="cat-icon">${icon}</span>
+                                <span>${cat.name}</span>
+                            </div>`;
+                });
+                html += `<div class="cat-btn ${currentCatIndex === categories.length ? 'active' : ''}" data-cat-index="favorite">
+                            <span class="cat-icon">⭐</span>
+                            <span>常用</span>
+                        </div>`;
+                categoryTabs.innerHTML = html;
+                document.querySelectorAll('.cat-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = btn.dataset.catIndex;
+                        if (idx === 'favorite') {
+                            if (currentCatIndex !== categories.length) {
+                                currentCatIndex = categories.length;
+                                renderCategoryTabs();
+                                renderCards();
+                            }
+                        } else {
+                            const numIdx = parseInt(idx);
+                            if (!isNaN(numIdx) && numIdx !== currentCatIndex) {
+                                currentCatIndex = numIdx;
+                                renderCategoryTabs();
+                                renderCards();
+                            }
+                        }
+                    });
+                });
+            }
+
+            function renderCards() {
+                if (currentCatIndex === categories.length) {
+                    const entries = Array.from(wordUsage.entries())
+                        .map(([word, data]) => ({ word, count: data.count }))
+                        .sort((a, b) => b.count - a.count)
+                        .slice(0, 30);
+                    if (entries.length === 0) {
+                        cardContainer.innerHTML = '<div style="text-align:center; font-size:2rem; padding:40px; color:#888;">暂无常用词，点击其他分类中的词语后会自动记录</div>';
+                        return;
+                    }
+                    let html = '';
+                    entries.forEach(item => {
+                        html += `<div class="hand-card" data-word="${item.word}" data-catidx="favorite" data-wordidx="${item.word}">
+                                    ${getMediaHtml(item.word, "card-media")}
+                                    <div class="word">${item.word}</div>
+                                </div>`;
+                    });
+                    cardContainer.innerHTML = html;
+                    document.querySelectorAll('.hand-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            if (!currentMode) { alert('请先选择上方入口'); return; }
+                            const word = card.dataset.word;
+                            if (currentMode === 'deaf') {
+                                deafSentence.push(word);
+                                addWordUsage(word);
+                            } else {
+                                normalSentence.push(word);
+                            }
+                            updateDisplay();
+                        });
+                    });
+                } else {
+                    const cat = categories[currentCatIndex];
+                    let html = '';
+                    cat.words.forEach((word, idx) => {
+                        html += `<div class="hand-card" data-word="${word.chinese}" data-catidx="${currentCatIndex}" data-wordidx="${idx}">
+                                    ${getMediaHtml(word.chinese, "card-media")}
+                                    <div class="word">${word.chinese}</div>
+                                </div>`;
+                    });
+                    cardContainer.innerHTML = html;
+                    document.querySelectorAll('.hand-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            if (!currentMode) { alert('请先选择上方入口'); return; }
+                            const word = card.dataset.word;
+                            if (currentMode === 'deaf') {
+                                deafSentence.push(word);
+                                addWordUsage(word);
+                            } else {
+                                normalSentence.push(word);
+                            }
+                            updateDisplay();
+                        });
+                    });
+                }
+            }
+
+            function highlightCard(categoryIndex, wordIndex) {
+                if (categoryIndex !== currentCatIndex) {
+                    if (categoryIndex === categories.length) {
+                        currentCatIndex = categories.length;
+                        renderCategoryTabs();
+                        renderCards();
+                    } else {
+                        currentCatIndex = categoryIndex;
+                        renderCategoryTabs();
+                        renderCards();
+                    }
+                }
+                setTimeout(() => {
+                    let targetCard;
+                    if (currentCatIndex === categories.length) {
+                        const word = allWords.find(w => w.categoryIndex === categoryIndex && w.wordIndex === wordIndex)?.chinese;
+                        if (word) targetCard = document.querySelector(`.hand-card[data-word="${word}"]`);
+                    } else {
+                        targetCard = document.querySelector(`.hand-card[data-catidx="${categoryIndex}"][data-wordidx="${wordIndex}"]`);
+                    }
+                    if (targetCard) {
+                        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetCard.classList.add('highlight-card');
+                        setTimeout(() => targetCard.classList.remove('highlight-card'), 1200);
+                    }
+                }, 100);
+            }
+
+            function updateSuggestions(query) {
+                if (!query.trim()) {
+                    suggestionsBox.classList.add('hidden');
+                    suggestionsBox.innerHTML = '';
+                    return;
+                }
+                const lowerQuery = query.trim().toLowerCase();
+                const matched = allWords.filter(item => item.chinese.toLowerCase().includes(lowerQuery)).slice(0, 8);
+                if (matched.length === 0) {
+                    suggestionsBox.classList.add('hidden');
+                    return;
+                }
+                suggestionsBox.classList.remove('hidden');
+                suggestionsBox.innerHTML = matched.map(item => {
+                    return `<div class="suggestion-item" data-catidx="${item.categoryIndex}" data-wordidx="${item.wordIndex}" data-word="${item.chinese}">
+                                ${getMediaHtml(item.chinese, "sug-media")}
+                                <span class="sug-word">${item.chinese}</span>
+                                <span class="sug-category">${item.categoryName}</span>
+                            </div>`;
+                }).join('');
+                document.querySelectorAll('.suggestion-item').forEach(sug => {
+                    sug.addEventListener('click', () => {
+                        const catIdx = parseInt(sug.dataset.catidx);
+                        const wordIdx = parseInt(sug.dataset.wordidx);
+                        const word = sug.dataset.word;
+                        highlightCard(catIdx, wordIdx);
+                        if (currentMode) {
+                            if (currentMode === 'deaf') {
+                                deafSentence.push(word);
+                                addWordUsage(word);
+                            } else {
+                                normalSentence.push(word);
+                            }
+                            updateDisplay();
+                        } else {
+                            alert('请先选择入口模式');
+                        }
+                        searchInput.value = '';
+                        suggestionsBox.classList.add('hidden');
+                    });
+                });
+            }
+
+            function setMode(mode) {
+                currentMode = mode;
+                deafSentence = [];
+                normalSentence = [];
+                if (mode === 'deaf') {
+                    modeDeafBtn.classList.add('active');
+                    modeNormalBtn.classList.remove('active');
+                    modeHint.innerText = '当前模式：聋哑人入口（点击手语图片，顶部显示汉语）';
+                } else {
+                    modeNormalBtn.classList.add('active');
+                    modeDeafBtn.classList.remove('active');
+                    modeHint.innerText = '当前模式：普通人入口（点击汉语词，顶部显示手语图片）';
+                }
+                updateDisplay();
+            }
+
+            quickLinks.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!currentMode) { alert('请先选择入口模式'); return; }
+                    const word = btn.dataset.word;
+                    if (currentMode === 'deaf') {
+                        deafSentence.push(word);
+                        addWordUsage(word);
+                    } else {
+                        normalSentence.push(word);
+                    }
+                    updateDisplay();
+                });
+            });
+
+            modeDeafBtn.addEventListener('click', () => setMode('deaf'));
+            modeNormalBtn.addEventListener('click', () => setMode('normal'));
+            clearBtn.addEventListener('click', clearSentence);
+            clearMemoryBtn.addEventListener('click', () => {
+                if (confirm('确定要清空所有常用词记忆吗？此操作不可撤销。')) clearMemory();
+            });
+            searchInput.addEventListener('input', (e) => updateSuggestions(e.target.value));
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                suggestionsBox.classList.add('hidden');
+            });
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    suggestionsBox.classList.add('hidden');
+                }
+            });
+
+            loadUsageFromStorage();
+            renderCategoryTabs();
+            renderCards();
+            setMode('deaf');
+        })();
+    </script>
+</body>
+</html>
